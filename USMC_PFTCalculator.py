@@ -72,6 +72,117 @@ class TestFitnessFunctions(unittest.TestCase):
         self.assertEqual(self.roadRunner.getCrunchScore(), 100, "Crunch score incorrect for 100 crunches")
 
     def test_getPullupScore(self):
+        # Testing zero, mid, high, over
         self.assertEqual(self.zombie.getPullupScore(), 0, "Pull score incorrect for 0 pulls")
+        self.assertEqual(self.turtle.getPullupScore(), 5, "Pull score incorrect for 1 pulls")
+        self.assertEqual(self.rabbit.getPullupScore(), 100, "Pull score incorrect for 20 pulls")
+        self.assertEqual(self.roadRunner.getPullupScore(), 100, "Pull score incorrect for 30 pulls")
 
+    def test_getRunScore(self):
+        # Testing zero, mid, high, over
+        self.assertEqual(self.zombie.getRunScore(), 0, "Run score incorrect for " + self.zombie.run + "->" + str(self.zombie.getRunScore()))
+        self.assertEqual(self.turtle.getRunScore(), 0, "Run score incorrect for " + self.turtle.run + "->" + str(self.turtle.getRunScore()))
+        self.assertEqual(self.rabbit.getRunScore(), 100, "Run score incorrect for " + self.rabbit.run + "->" + str(self.rabbit.getRunScore()))
+        self.assertEqual(self.roadRunner.getRunScore(), 100, "Run score incorrect for " + self.roadRunner.run + "->" + str(self.roadRunner.getRunScore()))
+        self.assertEqual(self.edge1.getRunScore(), 99, "Run score incorrect for " + self.edge1.run + "->" + str(self.edge1.getRunScore()))
+        self.assertEqual(self.edge2.getRunScore(), 99, "Run score incorrect for " + self.edge2.run + "->" + str(self.edge2.getRunScore()))
+        self.assertEqual(self.edge3.getRunScore(), 98, "Run score incorrect for " + self.edge3.run + "->" + str(self.edge3.getRunScore()))
+        self.assertEqual(self.edge4.getRunScore(), 94, "Run score incorrect for " + self.edge4.run + "->" + str(self.edge4.getRunScore()))
+        self.assertEqual(self.edge5.getRunScore(), 94, "Run score incorrect for " + self.edge5.run + "->" + str(self.edge5.getRunScore()))
+        self.assertEqual(self.edge6.getRunScore(), 93, "Run score incorrect for " + self.edge6.run + "->" + str(self.edge6.getRunScore()))
 
+    def testCalculateScore(self):
+        self.assertEqual(self.zombie.getTotalScore(), 0, "Total score incorrect for zombie: " + str(self.zombie.getTotalScore()))
+        self.assertEqual(self.turtle.getTotalScore(), 6, "Total score incorrect for turtle: " + str(self.turtle.getTotalScore()))
+        self.assertEqual(self.rabbit.getTotalScore(), 300, "Total score incorrect for rabbit: " + str(self.rabbit.getTotalScore()))
+        self.assertEqual(self.roadRunner.getTotalScore(), 300, "Total score incorrect for roadRunner: " + str(self.roadRunner.getTotalScore()))
+
+    def test_saveMemberToFile(self):
+        self.m.saveMemberToFile()
+        fin = open("Dewitt.Amanda.txt", 'r')
+        fileTxt = fin.read().strip()
+        fin.close()
+        testTxt = "Amanda\nDewitt\n35\nM\n10\n50\n24:00"
+        self.assertEqual(fileTxt, testTxt, "Text in save file not correct")
+
+    def test_getMemberFromFile(self):
+        self.m.saveMemberToFile()
+        lm = getMemberFromFile("Dewitt.Amanda.txt")
+        self.assertEqual(lm.firstname, "Amanda", "getMemberFromFile not setting firstname correctly")
+        self.assertEqual(lm.lastname, "Dewitt", "getMemberFromFile not setting lastname correctly")
+        self.assertEqual(lm.age, 35, "getMemberFromFile not setting age correctly")
+        self.assertEqual(lm.gender, "M", "getMemberFromFile not setting gender correctly")
+        self.assertEqual(lm.pulls, 10, "getMemberFromFile not setting pulls correctly")
+        self.assertEqual(lm.crunches, 50, "getMemberFromFile not setting crunches correctly")
+        self.assertEqual(lm.run, "24:00", "getMemberFromFile not setting runtime correctly")
+
+        self.zombie.saveMemberToFile()
+        lm = getMemberFromFile("Dead.Walking.txt")
+        self.assertEqual(lm.firstname, "Walking", "getMemberFromFile not setting firstname correctly")
+        self.assertEqual(lm.lastname, "Dead", "getMemberFromFile not setting lastname correctly")
+        self.assertEqual(lm.age, 100, "getMemberFromFile not setting age correctly")
+        self.assertEqual(lm.gender, "M", "getMemberFromFile not setting gender correctly")
+        self.assertEqual(lm.pulls, 0, "getMemberFromFile not setting pulls correctly")
+        self.assertEqual(lm.crunches, 0, "getMemberFromFile not setting crunches correctly")
+        self.assertEqual(lm.run, "100:00", "getMemberFromFile not setting runtime correctly")
+
+    def test_loadMemberList(self):
+        l = loadMemberList()
+        self.assertEqual(len(l), 2, "loadMemberList did not load all files found in master.txt")
+        foundWalkingDead = False
+        foundNinjaTurtle = False
+
+        for m in l:
+            if m.firstname == "Walking":
+                foundWalkingDead = True
+            elif m.firstname == "Ninja":
+                foundNinjaTurtle = True
+
+        self.assertEqual(foundWalkingDead, "Did not add Walking Dead to the list")
+        self.assertEqual(foundNinjaTurtle, "Did not add Ninja Turtle to the list")
+
+    #TESTING FOR EXCEPTIONS
+    def test_getMemberFromFileForExceptionHandling(self):
+        try:
+            self.assertEqual(None, getMemberFromFile("nothere.txt")) # doesn't exist
+            self.assertEqual(None, getMemberFromFile("/etc/shadow")) # permission denied
+        except Exception, msg:
+            self.fail(msg)
+
+    def test_scoreCalcExceptionHandling(self):
+        try:
+            self.assertEqual(0, self.screwup.getCrunchScore())
+            self.assertEqual(0, self.screwup.getPullupScore())
+            self.assertEqual(0, self.screwup.getRunScore())
+            self.screwup.saveMemberToFile()
+        except Exception, msg:
+            self.fail(msg)
+
+    def test_loadMemberListForExceptions(self):
+        if os.path.isfile('master.txt'):
+            os.remove('master.txt')
+        try:
+            loadMemberList()
+        except Exception, msg:
+            self.fail(msg)
+
+    def cleanUpTestFiles(self):
+        fileList = ["master.txt"]
+        for m in self.mlist:
+            filename = m.lastname + "." + m.firstname + ".txt"
+            fileList.append(filename)
+
+        for f in fileList:
+            if os.path.isfile(f):
+                os.remove(f)
+
+    # clean up all the files generated in testing
+    def tearDown(self):
+        self.cleanUpTestFiles()
+
+if __name__ == '__main__':
+    if dotests:
+        suite = unittest.TestLoader().loadTestsFromTestCase(TestFitnessFunctions)
+        unittest.TextTestRunner(verbosity=2).run(suite)
+    else:
+        main()
