@@ -36,6 +36,7 @@ class TestFitnessFunctions(unittest.TestCase):
         mlist.append(self.edge4)
         mlist.append(self.edge5)
         mlist.append(self.edge6)
+        self.mlist = mlist
 
         #delete any files hanging out there
         self.cleanUpTestFiles()
@@ -44,7 +45,7 @@ class TestFitnessFunctions(unittest.TestCase):
         fout.write("Dead.Walking.txt\nTurtle.Ninja.txt")
         fout.close
         fout = open("Dead.Walking.txt", 'w')
-        fout.write("Walking\nDead\n199\nM\n0\n0\n100:00")
+        fout.write("Walking\nDead\n100\nM\n0\n0\n100:00")
         fout.close()
         fout.open("Turtle.Ninja.txt", 'w')
         fout.write("Ninja\nTurtle\n15\nM\n1\n1\n45:00")
@@ -56,13 +57,13 @@ class TestFitnessFunctions(unittest.TestCase):
 
     def test_repr(self):
         s = str(self.m)
-        self.assertEqual(s.find("Amanda"), -1, "First name not in repr")
-        self.assertEqual(s.find("Dewitt"), -1, "Last name not in repr")
-        self.assertEqual(s.find("35"), -1, "Age not in repr")
-        self.assertEqual(s.find("10"), -1, "Pulls not in repr")
-        self.assertEqual(s.find("50"), -1, "Crunches not in repr")
-        self.assertEqual(s.find("24:00"), -1, "Runtime not in repr")
-        self.assertEqual(s.find("164"), -1, "Total score not in repr")
+        self.assertNotEqual(s.find("Amanda"), -1, "First name not in repr")
+        self.assertNotEqual(s.find("Dewitt"), -1, "Last name not in repr")
+        self.assertNotEqual(s.find("35"), -1, "Age not in repr")
+        self.assertNotEqual(s.find("10"), -1, "Pulls not in repr")
+        self.assertNotEqual(s.find("50"), -1, "Crunches not in repr")
+        self.assertNotEqual(s.find("24:00"), -1, "Runtime not in repr")
+        self.assertNotEqual(s.find("164"), -1, "Total score not in repr")
 
     def test_getCrunchScore(self):
         # Testing zero, mid, high, over
@@ -138,8 +139,8 @@ class TestFitnessFunctions(unittest.TestCase):
             elif m.firstname == "Ninja":
                 foundNinjaTurtle = True
 
-        self.assertEqual(foundWalkingDead, "Did not add Walking Dead to the list")
-        self.assertEqual(foundNinjaTurtle, "Did not add Ninja Turtle to the list")
+        self.assertTrue(foundWalkingDead, "Did not add Walking Dead to the list")
+        self.assertTrue(foundNinjaTurtle, "Did not add Ninja Turtle to the list")
 
     #TESTING FOR EXCEPTIONS
     def test_getMemberFromFileForExceptionHandling(self):
